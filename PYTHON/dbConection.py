@@ -15,6 +15,7 @@ def try_connect():
         )
         conn.set_client_encoding('UTF8')
         print("Conexão com o banco de dados bem-sucedida!")
-        conn.close()
+        return conn
     except Exception as e:
         print("Erro ao conectar com o banco de dados:", e)
+        return None

@@ -12,9 +12,9 @@ create table if not exists transactionsLog (
     afterData JSONB,
     transactionStatus TEXT,     -- commit ou rollback
     moment TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
+);
 
-create or replace function log_transition() return trigger as $$
+create or replace function log_transition() returns trigger as $$
 declare 
     v_txid text;
 begin
@@ -39,15 +39,15 @@ end;
 $$ LANGUAGE plpgsql;
 
 create trigger trigger_log_insert 
-after insert on products 
+after insert on clientes 
 for each row execute function log_transition();
 
 create trigger trigger_log_update
-after update on products
+after update on clientes
 for each row execute function log_transition();
 
 create trigger trigger_log_delete
-after update on products
+after delete on clientes
 for each row execute function log_transition();
 
 BEGIN;
