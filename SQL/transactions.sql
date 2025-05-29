@@ -1,15 +1,15 @@
 BEGIN;
 INSERT INTO clientes (nome, saldo) VALUES ('Cliente 1', 100.00);
 UPDATE clientes SET saldo = saldo + 50 WHERE id = 1;
-COMMIT;
+END;
 BEGIN;
 INSERT INTO clientes (nome, saldo) VALUES ('Cliente 2', 200.00);
 UPDATE clientes SET saldo = saldo + 50 WHERE id = 2;
-COMMIT;
+END;
 BEGIN;
 INSERT INTO clientes (nome, saldo) VALUES ('Cliente 3', 300.00);
 UPDATE clientes SET saldo = saldo + 50 WHERE id = 2;
-COMMIT;
+END;
 BEGIN;
 INSERT INTO clientes (nome, saldo) VALUES ('Cliente 4', 400.00);
 UPDATE clientes SET saldo = saldo + 50 WHERE id = 3;

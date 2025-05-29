@@ -1,4 +1,3 @@
-import re
 from dbConection import try_connect
 
 def log_event(cur, txid, operation):
@@ -39,55 +38,54 @@ def read_transactions(path):
     return blocks
 
 def execute_block(conn, block):
-    has_commit = any(stmt.strip().upper() == 'COMMIT;' for stmt in block)
     cur = conn.cursor()
     txid = None
     try:
-        cur.execute('BEGIN;')
-        txid = get_current_txid(conn)
+        in_transaction = False
 
-        log_event(cur, txid, 'start')
+        for stmt in block:
+            up = stmt.strip().upper()
+            print(f"DEBUG: stmt raw: '{stmt}' | up: '{up}'")
+            if up == 'BEGIN;':
+                cur.execute('BEGIN;')
+                txid = get_current_txid(conn)
+                log_event(cur, txid, 'start')
+                in_transaction = True
 
-        if has_commit:
-            for stmt in block[1:]:
-                up = stmt.strip().upper()
-                if up == 'COMMIT;':
-                    break
+            elif up == 'END;':
+                if in_transaction:
+                    log_event(cur, txid, 'commit')
+                    cur.execute('COMMIT;')
+                    conn.commit()
+                    in_transaction = False
+
+            else:
                 cur.execute(stmt)
+        if in_transaction:
             cur.execute('COMMIT;')
-            log_event(cur, txid, 'commit')
-
-        else:
-            cur.execute('SAVEPOINT sp_dml;')
-            operations = []
-
-            for stmt in block[1:]:
-                up = stmt.strip().upper()
-                cur.execute(stmt)
-                if up.startswith('INSERT'):
-                    operations.append('insert')
-                elif up.startswith('UPDATE'):
-                    operations.append('update')
-                elif up.startswith('DELETE'):
-                    operations.append('delete')
-
-            cur.execute('ROLLBACK TO SAVEPOINT sp_dml;')
-
-            for op in operations:
-                log_event(cur, txid, op)
-
-            cur.execute('COMMIT;')
-
+            conn.commit()
     except Exception as e:
         print(f"Erro no bloco txid={txid}: {e}")
         cur.execute('ROLLBACK;')
+        conn.commit()
+
     finally:
         cur.close()
+
+
+def run_setup_sql(conn, path):
+    with conn.cursor() as cur:
+        with open(path, 'r') as f:
+            cur.execute(f.read())
+        conn.commit()
 
 if __name__ == '__main__':
     conn = try_connect()
     if conn:
+        run_setup_sql(conn, 'C:/Users/Thiago/Desktop/BDII/Log-REDO-BD/SQL/createTables.sql')
+
         blocks = read_transactions('C:/Users/Thiago/Desktop/BDII/Log-REDO-BD/SQL/transactions.sql')
         for block in blocks:
             execute_block(conn, block)
         conn.close()
+
