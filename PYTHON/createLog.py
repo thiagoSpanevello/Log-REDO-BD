@@ -1,3 +1,4 @@
+from pathlib import Path
 from dbConection import try_connect
 
 def log_event(cur, txid, operation):
@@ -82,9 +83,14 @@ def run_setup_sql(conn, path):
 if __name__ == '__main__':
     conn = try_connect()
     if conn:
-        run_setup_sql(conn, 'C:/Users/Thiago/Desktop/BDII/Log-REDO-BD/SQL/createTables.sql')
+        parent_folder = Path(__file__).parent.parent.resolve()/"SQL"
+        
+        path = parent_folder / "createTables.sql"
+        print("-->", path)
+        run_setup_sql(conn, path)
 
-        blocks = read_transactions('C:/Users/Thiago/Desktop/BDII/Log-REDO-BD/SQL/transactions.sql')
+        path = parent_folder / "transactions.sql"
+        blocks = read_transactions(path)
         for block in blocks:
             execute_block(conn, block)
         conn.close()

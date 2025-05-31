@@ -1,24 +1,26 @@
 -- Remove o trigger e a função se já existirem
-DROP TRIGGER IF EXISTS trigger_log_event ON clientes;
-DROP FUNCTION IF EXISTS log_transition();
 
--- Criação da tabela clientes
-CREATE UNLOGGED TABLE IF NOT EXISTS clientes (
-    id SERIAL PRIMARY KEY,
-    nome TEXT,
-    saldo NUMERIC
-);
+DROP TABLE transactionsLog;
+DROP TABLE clientes;
 
 -- Criação da tabela de log
-CREATE TABLE IF NOT EXISTS transactionsLog (
+CREATE TABLE transactionsLog (
     id SERIAL PRIMARY KEY,
     idTransaction TEXT,
-    operation TEXT,  -- insert, update, delete
+    operation TEXT,  -- insert, update, delete, start, commit
     prevData JSONB,
     afterData JSONB,
     transactionStatus TEXT,     -- commit ou rollback
     moment TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Criação da tabela clientes
+CREATE UNLOGGED TABLE clientes (
+    id SERIAL PRIMARY KEY,
+    nome TEXT,
+    saldo NUMERIC
+);
+
 
 -- Função de log
 CREATE OR REPLACE FUNCTION log_transition() RETURNS trigger AS $$
