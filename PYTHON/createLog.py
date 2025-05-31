@@ -86,7 +86,6 @@ if __name__ == '__main__':
         parent_folder = Path(__file__).parent.parent.resolve()/"SQL"
         
         path = parent_folder / "createTables.sql"
-        print("-->", path)
         run_setup_sql(conn, path)
 
         path = parent_folder / "transactions.sql"
