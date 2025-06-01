@@ -26,6 +26,16 @@ if con and True:
         if r[2] == "commit":
             ids.append(r[1])
 
+    # printando as transações que devem realizar REDO
+    print("Operações a ser realizadas:")
+    for r in res:
+        if r[1] in ids:
+            # print(r[2])
+            if r[2] != "start" and r[2] != "commit":
+                print(f"Realizar um {r[2]} no cliente com id={r[0]}")
+                print(f"Na transação={r[1]}")
+                print("")
+
     for r in res:
         if r[1] not in ids:
             continue
@@ -57,6 +67,6 @@ if con and True:
                 )
 
     con.commit()
-    print("os dados foram restaurados")
+    # print("Os dados foram restaurados")
     cursor.close()
     con.close()
